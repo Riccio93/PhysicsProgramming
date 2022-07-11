@@ -1,125 +1,120 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class BallController : MonoBehaviour
 {
-    [Header("Camera")]
+    [Header("Objects refs")]
     [SerializeField] private Camera mainCamera;
+    //Components
+    private Rigidbody rbody;
+    private LineRenderer lineRenderer;
+    
+
+    [Header("Parameters")]
+    //Stop if the ball's velocity is lower than this value
+    [SerializeField] private float stopVelocity = .05f;
+    //Value to multiply for the line length to obtain the resulting force
+    [SerializeField] private float shotPower = 150f;
     [SerializeField] private Vector3 cameraDistance;
 
-    [Header("UI")]
-    [SerializeField] private Slider horizontalSlider;
-    [SerializeField] private Text horizontalSliderValueText;
-    [SerializeField] private Slider verticalSlider;
-    [SerializeField] private Text verticalSliderValueText;
-    [SerializeField] private Slider windSlider;
-    [SerializeField] private Text windSliderValueText;
+    [Header("Variables (READ ONLY - FOR DEBUGGING)")]
+    [SerializeField] private bool bIsIdle;
+    [SerializeField] private bool bIsAiming;
 
-    //[Header("Impulse")]
-    //[SerializeField] private float horizontalMinValue;
-    //[SerializeField] private float horizontalMaxValue;
-    //[SerializeField] private float verticalMinValue;
-    //[SerializeField] private float verticalMaxValue;
-    //[SerializeField] private float windMinValue;
-    //[SerializeField] private float windMaxValue;
-
-    [Space]
-
-    private float directionValue;
-    private float impulseValue;
-    private float windValue;
-
-    private Rigidbody ballRB;
-    public Vector3 impulseVersor;
-    public bool bIsBallOnGround;
-
-    private void Start()
+    private void Awake()
     {
-        ballRB = GetComponent<Rigidbody>();
-        InitSliders();
+        rbody = GetComponent<Rigidbody>();
+        lineRenderer = GetComponentInChildren<LineRenderer>();
+        lineRenderer.enabled = false;
+        bIsIdle = true;
+        bIsAiming = false;
     }
 
-    private void InitSliders()
+    private void FixedUpdate()
     {
-        horizontalSlider.minValue = -Mathf.PI / 4;
-        horizontalSlider.maxValue = Mathf.PI / 4;
-        verticalSlider.minValue = 100;
-        verticalSlider.maxValue = 1000;
-        windSlider.minValue = -200;
-        windSlider.maxValue = 200;
-
-        UpdateHorizontalSlider();
-        UpdateVerticalSlider();
-        UpdateWindSlider();
+        // if > 0 is removed bIsIdle is set to true again the first "normal" frame after the fixedupdate
+        if (rbody.velocity.magnitude < stopVelocity && rbody.velocity.magnitude > 0)
+        {
+            Stop();
+        }
+        ComputeAim();
     }
 
-    public void AddImpulse()
+    //private void LateUpdate()
+    //{
+    //    mainCamera.transform.position = transform.position + cameraDistance;
+    //}
+
+    private void ComputeAim()
     {
-        impulseVersor = new Vector3(Mathf.Cos(directionValue + (Mathf.PI/2)), .5f, Mathf.Sin(directionValue + (Mathf.PI/2))).normalized;
-        if (ballRB)
-            Debug.Log("RB set");
+        if (!bIsAiming || !bIsIdle)
+            return;
+
+        Vector3? worldPoint = CastMouseClickRay();
+        if (!worldPoint.HasValue)
+        {
+            return;
+        }
+        DrawLine(worldPoint.Value);
+    }
+
+    private Vector3? CastMouseClickRay()
+    {
+        Vector3 screenMousePosFar = new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.farClipPlane);
+        Vector3 screenMousePosNear = new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane);
+        Vector3 worldMousePosFar = Camera.main.ScreenToWorldPoint(screenMousePosFar);
+        Vector3 worldMousePosNear = Camera.main.ScreenToWorldPoint(screenMousePosNear);
+        if (Physics.Raycast(worldMousePosNear, worldMousePosFar - worldMousePosNear, out RaycastHit hit, float.PositiveInfinity))
+        {
+            return hit.point;
+        }
         else
-            Debug.Log("RB not set");
-        ballRB.AddRelativeForce(impulseVersor * impulseValue, ForceMode.Impulse);
-        ballRB.AddRelativeTorque((impulseVersor + new Vector3(90, 0, 0)) * impulseValue, ForceMode.Impulse);
-        StartCoroutine(ApplyWindForceCoroutine());
+        {
+            return null;
+        }
+    }  
+
+    private void Stop()
+    {
+        rbody.velocity = Vector3.zero;
+        rbody.angularVelocity = Vector3.zero;
+        bIsIdle = true;
+    }    
+
+    private void Shoot(Vector3 worldPoint)
+    {
+        bIsAiming = false;
+        lineRenderer.enabled = false;
+        bIsIdle = false;
+
+        Vector3 horizontalWorldPoint = new Vector3(worldPoint.x, transform.position.y, worldPoint.z);
+        Vector3 direction = (horizontalWorldPoint - transform.position).normalized;
+        float strength = Vector3.Distance(transform.position, horizontalWorldPoint);
+        rbody.AddForce(shotPower * strength * direction);        
     }
 
-    public IEnumerator ApplyWindForceCoroutine()
+    private void DrawLine(Vector3 worldPoint)
     {
-        do
-        {
-            ballRB.AddForce(windValue * Vector3.right, ForceMode.Impulse);
-            ballRB.AddTorque(windValue * Vector3.right, ForceMode.Impulse);
-            Debug.Log("Wind");
-            yield return new WaitForSeconds(.2f);
-        } while (!bIsBallOnGround);
-        yield return null;
+        Vector3[] positions = {transform.position, worldPoint};
+        lineRenderer.SetPositions(positions);
+        lineRenderer.enabled = true;
     }
 
-    public void OnCollisionEnter(Collision collision)
+    private void OnMouseDown()
     {
-        if(collision.gameObject.CompareTag("Floor"))
+        if (bIsIdle)
         {
-            bIsBallOnGround = true;
+            bIsAiming = true;
         }
     }
-    public void OnCollisionExit(Collision collision)
+
+    private void OnMouseUp()
     {
-        if(collision.gameObject.CompareTag("Floor"))
+        if (bIsAiming && bIsIdle)
         {
-            bIsBallOnGround = false;
+            Vector3? worldPoint = CastMouseClickRay();
+            Shoot(worldPoint.Value);
         }
-    }
-
-    public void ResetScene()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
-
-    //Makes the camera follow the ball
-    private void LateUpdate()
-    {
-        mainCamera.transform.position = transform.position + cameraDistance;
-    }
-
-    //Debug sliders update
-    public void UpdateHorizontalSlider()
-    {
-        directionValue = horizontalSlider.value;
-        horizontalSliderValueText.text = directionValue.ToString();
-    }
-    public void UpdateVerticalSlider()
-    {
-        impulseValue = verticalSlider.value;
-        verticalSliderValueText.text = impulseValue.ToString();
-    }
-    public void UpdateWindSlider()
-    {
-        windValue = windSlider.value;
-        windSliderValueText.text = windValue.ToString();
     }
 }
