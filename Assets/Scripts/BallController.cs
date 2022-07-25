@@ -2,25 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using GameState = GameManager.GameState;
+
 public class BallController : MonoBehaviour
 {
-    [Header("Objects refs")]
-    [SerializeField] private Camera mainCamera;
-    //Components
-    private Rigidbody rbody;
-    private LineRenderer lineRenderer;
-    
-
     [Header("Parameters")]
     //Stop if the ball's velocity is lower than this value
-    [SerializeField] private float stopVelocity = .05f;
+    [SerializeField] private float stopVelocity = .1f;
     //Value to multiply for the line length to obtain the resulting force
     [SerializeField] private float shotPower = 150f;
-    [SerializeField] private Vector3 cameraDistance;
 
-    [Header("Variables (READ ONLY - FOR DEBUGGING)")]
+    [Header("Objects refs")]
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private GameObject raycastPlane;
+
+    //Components
+    private Rigidbody rbody;
+    private LineRenderer lineRenderer;    
+
+    [Header("DEBUG ONLY")]
     [SerializeField] private bool bIsIdle;
     [SerializeField] private bool bIsAiming;
+
+    #region Unity Functions
 
     private void Awake()
     {
@@ -33,7 +37,7 @@ public class BallController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // if > 0 is removed bIsIdle is set to true again the first "normal" frame after the fixedupdate
+        // if > 0 is removed bIsIdle is set to true again the first non-physics frame after the fixedupdate
         if (rbody.velocity.magnitude < stopVelocity && rbody.velocity.magnitude > 0)
         {
             Stop();
@@ -41,14 +45,13 @@ public class BallController : MonoBehaviour
         ComputeAim();
     }
 
-    //private void LateUpdate()
-    //{
-    //    mainCamera.transform.position = transform.position + cameraDistance;
-    //}
+    #endregion
+
+    #region Aiming
 
     private void ComputeAim()
     {
-        if (!bIsAiming || !bIsIdle)
+        if (gameManager.GetGameState()!= GameState.Aiming || !bIsAiming || !bIsIdle)
             return;
 
         Vector3? worldPoint = CastMouseClickRay();
@@ -73,14 +76,35 @@ public class BallController : MonoBehaviour
         {
             return null;
         }
-    }  
+    }
 
-    private void Stop()
+    private void DrawLine(Vector3 worldPoint)
     {
-        rbody.velocity = Vector3.zero;
-        rbody.angularVelocity = Vector3.zero;
-        bIsIdle = true;
-    }    
+        Vector3[] positions = { transform.position, worldPoint };
+        lineRenderer.SetPositions(positions);
+        lineRenderer.enabled = true;
+    }
+
+    private void OnMouseDown()
+    {
+        if (gameManager.GetGameState() == GameState.Aiming && bIsIdle)
+        {
+            bIsAiming = true;
+        }
+    }
+
+    private void OnMouseUp()
+    {
+        if (gameManager.GetGameState() == GameState.Aiming && bIsAiming && bIsIdle)
+        {
+            Vector3? worldPoint = CastMouseClickRay();
+            Shoot(worldPoint.Value);
+        }
+    }
+
+    #endregion
+
+    #region Shot
 
     private void Shoot(Vector3 worldPoint)
     {
@@ -91,30 +115,33 @@ public class BallController : MonoBehaviour
         Vector3 horizontalWorldPoint = new Vector3(worldPoint.x, transform.position.y, worldPoint.z);
         Vector3 direction = (horizontalWorldPoint - transform.position).normalized;
         float strength = Vector3.Distance(transform.position, horizontalWorldPoint);
-        rbody.AddForce(shotPower * strength * direction);        
+        //the minus reverses the direction of the force
+        rbody.AddForce(-shotPower * strength * direction);
+
+        gameManager.SetGameState(GameState.Moving);
     }
 
-    private void DrawLine(Vector3 worldPoint)
+    private void Stop()
     {
-        Vector3[] positions = {transform.position, worldPoint};
-        lineRenderer.SetPositions(positions);
-        lineRenderer.enabled = true;
-    }
+        rbody.velocity = Vector3.zero;
+        rbody.angularVelocity = Vector3.zero;
+        bIsIdle = true;
 
-    private void OnMouseDown()
-    {
-        if (bIsIdle)
+        if (gameManager.GetGameState() == GameState.Moving)
         {
-            bIsAiming = true;
+            gameManager.SetGameState(GameState.Stopping);
+            gameManager.UpdateTries();
         }
+
+        UpdateRaycastPlanePosition();
     }
 
-    private void OnMouseUp()
+    private void UpdateRaycastPlanePosition()
     {
-        if (bIsAiming && bIsIdle)
-        {
-            Vector3? worldPoint = CastMouseClickRay();
-            Shoot(worldPoint.Value);
-        }
+        //Moves the raycast plane under the ball, so that the raycast is always possible.
+        raycastPlane.transform.position = transform.position + new Vector3(0, -1, 0);
     }
+
+    #endregion
+    
 }
