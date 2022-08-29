@@ -1,25 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     [Header("Parameters")]
     [SerializeField] private Vector3 cameraDistance;
     [SerializeField] private Vector3 cameraRotation;
-    private int numberOfTries = 3;
+    [SerializeField] private int numberOfTries = 3;
+    [SerializeField] private float freeModeCameraMovement = .2f;
 
-    [Header("Objects references")]
+    [Header("Objects References")]
     [SerializeField] private Canvas canvas;
     private UIBehaviour uiBehaviour;
     [SerializeField] private Camera mainCamera;
+    [SerializeField] private GameObject ball;
 
     [Header("DEBUG ONLY")]
     [SerializeField] private GameState gameState;
 
     public enum GameState
     {
-        Panoramic,
+        FreeMode,
         Aiming,
         Moving,
         Stopping,
@@ -45,31 +48,55 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        gameState = GameState.Panoramic;
-        //ShowLevel();
+        gameState = GameState.Aiming;
         uiBehaviour.SetTriesValue(numberOfTries);
     }
 
     private void LateUpdate()
     {
-        mainCamera.transform.position = transform.position + cameraDistance;
-    }
-
-    void ShowLevel()
-    {
-
+        if(GetGameState() != GameState.FreeMode)
+            mainCamera.transform.position = ball.transform.position + cameraDistance;
+        else
+        {
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                mainCamera.transform.position += new Vector3(freeModeCameraMovement, 0f, 0f);
+                Debug.Log("Left pressed");
+            }
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                mainCamera.transform.position += new Vector3(-freeModeCameraMovement, 0f, 0f);
+                Debug.Log("Right pressed");
+            }
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                mainCamera.transform.position += new Vector3(0f, 0f, -freeModeCameraMovement);
+                Debug.Log("Up pressed");
+            }
+            if (Input.GetKey(KeyCode.DownArrow))
+            {
+                mainCamera.transform.position += new Vector3(0f, 0f, freeModeCameraMovement);
+                Debug.Log("Down pressed");
+            }
+        }        
     }
 
     public void UpdateTries()
     {
         uiBehaviour.SetTriesValue(--numberOfTries);
-        if (numberOfTries >= 2)
+        if (numberOfTries >= 1)
         {            
             SetGameState(GameState.Aiming);
         }            
         else
         {
             SetGameState(GameState.GameOver);
+            uiBehaviour.ShowGameOverScreen(false);
         }
+    }
+
+    public void LevelCompleted()
+    {
+        uiBehaviour.ShowGameOverScreen(true);
     }
 }

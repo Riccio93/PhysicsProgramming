@@ -12,7 +12,7 @@ public class BallController : MonoBehaviour
     //Value to multiply for the line length to obtain the resulting force
     [SerializeField] private float shotPower = 150f;
 
-    [Header("Objects refs")]
+    [Header("Objects References")]
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject raycastPlane;
 
@@ -117,6 +117,7 @@ public class BallController : MonoBehaviour
         float strength = Vector3.Distance(transform.position, horizontalWorldPoint);
         //the minus reverses the direction of the force
         rbody.AddForce(-shotPower * strength * direction);
+        //rbody.AddTorque(-shotPower * strength * direction);
 
         gameManager.SetGameState(GameState.Moving);
     }
