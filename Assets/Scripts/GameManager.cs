@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -61,22 +58,18 @@ public class GameManager : MonoBehaviour
             if (Input.GetKey(KeyCode.LeftArrow))
             {
                 mainCamera.transform.position += new Vector3(freeModeCameraMovement, 0f, 0f);
-                Debug.Log("Left pressed");
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
                 mainCamera.transform.position += new Vector3(-freeModeCameraMovement, 0f, 0f);
-                Debug.Log("Right pressed");
             }
             if (Input.GetKey(KeyCode.UpArrow))
             {
                 mainCamera.transform.position += new Vector3(0f, 0f, -freeModeCameraMovement);
-                Debug.Log("Up pressed");
             }
             if (Input.GetKey(KeyCode.DownArrow))
             {
                 mainCamera.transform.position += new Vector3(0f, 0f, freeModeCameraMovement);
-                Debug.Log("Down pressed");
             }
         }        
     }

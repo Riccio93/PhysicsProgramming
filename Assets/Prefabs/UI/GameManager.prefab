@@ -46,6 +46,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraDistance: {x: -8.5, y: 9.5, z: 9.5}
   cameraRotation: {x: 40, y: 138, z: 0}
+  numberOfTries: 3
+  freeModeCameraMovement: 0.12
   canvas: {fileID: 0}
   mainCamera: {fileID: 0}
   ball: {fileID: 0}

@@ -259,8 +259,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec69d176362b7be4d8362f75f55cf81d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stopVelocity: 0.1
-  shotPower: 150
+  stopVelocity: 0.25
+  shotPower: 175
   gameManager: {fileID: 0}
   raycastPlane: {fileID: 0}
   bIsIdle: 0

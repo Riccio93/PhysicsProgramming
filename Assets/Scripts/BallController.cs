@@ -18,11 +18,18 @@ public class BallController : MonoBehaviour
 
     //Components
     private Rigidbody rbody;
-    private LineRenderer lineRenderer;    
+    private LineRenderer lineRenderer;
 
-    [Header("DEBUG ONLY")]
-    [SerializeField] private bool bIsIdle;
-    [SerializeField] private bool bIsAiming;
+    private Vector3 ballPosBeforeAiming;
+    public Vector3 GetBallPosBeforeAiming()
+    {
+        return ballPosBeforeAiming;
+    }
+
+    //[Header("DEBUG ONLY")]
+    /*[SerializeField]*/
+    private bool bIsIdle;
+    /*[SerializeField]*/ private bool bIsAiming;
 
     #region Unity Functions
 
@@ -90,6 +97,7 @@ public class BallController : MonoBehaviour
         if (gameManager.GetGameState() == GameState.Aiming && bIsIdle)
         {
             bIsAiming = true;
+            ballPosBeforeAiming = transform.position;
         }
     }
 
@@ -144,5 +152,4 @@ public class BallController : MonoBehaviour
     }
 
     #endregion
-    
 }

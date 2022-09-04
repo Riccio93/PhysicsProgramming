@@ -11,6 +11,7 @@ public class MenuBehaviour : MonoBehaviour
     [SerializeField] private Quaternion mainRotation;
     [SerializeField] private Quaternion levelRotation;
     [SerializeField] private Quaternion optionsRotation;
+    [SerializeField] private Quaternion guideRotation;
 
     [Header("Objects references")]
     [SerializeField] private Camera mainCamera;
@@ -21,6 +22,8 @@ public class MenuBehaviour : MonoBehaviour
     public void GoToMainMenuFromLevelSelection() => StartCoroutine(RotateCameraCoroutine(levelRotation, mainRotation));
     public void GoToOptions() => StartCoroutine(RotateCameraCoroutine(mainRotation, optionsRotation));
     public void GoToMainMenuFromOptions() => StartCoroutine(RotateCameraCoroutine(optionsRotation, mainRotation));
+    public void GoToGuide() => StartCoroutine(RotateCameraCoroutine(mainRotation, guideRotation));
+    public void GoToMainMenuFromGuide() => StartCoroutine(RotateCameraCoroutine(guideRotation, mainRotation));
 
     private IEnumerator RotateCameraCoroutine(Quaternion start, Quaternion end)
     {
@@ -60,6 +63,9 @@ public class MenuBehaviour : MonoBehaviour
         Application.Quit();
     }
 
+
+    //Unsure if this is working, check later when audio is implemented (is shown like a string in the
+    //playerprefs plugin window)
     public void OnMusicVolumeChanged(System.Single Value) => PlayerPrefs.SetFloat("MusicVolume", Value);
     public void OnSFXVolumeChanged(System.Single Value) => PlayerPrefs.SetFloat("SFXVolume", Value);
 }
