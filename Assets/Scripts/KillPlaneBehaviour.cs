@@ -11,12 +11,11 @@ public class KillPlaneBehaviour : MonoBehaviour
     void Start()
     {
         ballController = ball.GetComponent<BallController>();
-        ballRB = ball.GetComponent<Rigidbody>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        ballRB.velocity = Vector3.zero;
+        ballController.Stop();
         ball.transform.position = ballController.GetBallPosBeforeAiming();
     }
 }

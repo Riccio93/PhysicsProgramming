@@ -1,8 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class MenuBehaviour : MonoBehaviour
 {
@@ -17,6 +16,9 @@ public class MenuBehaviour : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private GameObject eventSystem;
     [SerializeField] private GameObject level2Lock;
+    [SerializeField] private GameObject[] guidePages;
+    private int currentGuidePage;
+    [SerializeField] private TextMeshProUGUI pageNumberText;
 
     public void GoToLevelSelection() => StartCoroutine(RotateCameraCoroutine(mainRotation, levelRotation));
     public void GoToMainMenuFromLevelSelection() => StartCoroutine(RotateCameraCoroutine(levelRotation, mainRotation));
@@ -40,6 +42,7 @@ public class MenuBehaviour : MonoBehaviour
 
     public void Start()
     {
+        //Shows locks if levels are locked in the selection screen
         if(PlayerPrefs.GetInt("Level2Unlocked", 0) == 0)
         {
             level2Lock.SetActive(true);
@@ -48,6 +51,15 @@ public class MenuBehaviour : MonoBehaviour
         {
             level2Lock.SetActive(false);
         }
+
+        //Guide section pages initialization
+        foreach(GameObject obj in guidePages)
+        {
+            obj.SetActive(false);
+        }
+        guidePages[0].SetActive(true);
+        currentGuidePage = 0;
+        pageNumberText.text = "Page " + (currentGuidePage + 1) + " / " + guidePages.Length;
     }
 
     public void GoToLevel(int level)
@@ -68,4 +80,14 @@ public class MenuBehaviour : MonoBehaviour
     //playerprefs plugin window)
     public void OnMusicVolumeChanged(System.Single Value) => PlayerPrefs.SetFloat("MusicVolume", Value);
     public void OnSFXVolumeChanged(System.Single Value) => PlayerPrefs.SetFloat("SFXVolume", Value);
+
+    public void ChangePage(int offset)
+    {
+        if (currentGuidePage + offset >= 0 && currentGuidePage + offset < guidePages.Length)
+        {
+            guidePages[currentGuidePage].SetActive(false);
+            guidePages[currentGuidePage += offset].SetActive(true);
+            pageNumberText.text = "Page " + (currentGuidePage + 1) + " / " + guidePages.Length;
+        }
+    }
 }

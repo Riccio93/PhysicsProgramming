@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
         if (numberOfTries >= 1)
         {            
             SetGameState(GameState.Aiming);
-        }            
+        }
         else
         {
             SetGameState(GameState.GameOver);

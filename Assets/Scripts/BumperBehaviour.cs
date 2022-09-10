@@ -19,8 +19,9 @@ public class BumperBehaviour : MonoBehaviour
         if(collision.gameObject == ball)
         {
             //ballRB.AddForce(collision.contacts[0].normal * bumperForce, ForceMode.Impulse);
-            ballRB.AddForce(Vector3.Reflect(ballRB.velocity, collision.contacts[0].normal) * bumperForce, 
-                ForceMode.Impulse);
+            ballRB.AddExplosionForce(bumperForce, transform.position, 1);
+            //ballRB.AddForce(Vector3.Reflect(ballRB.velocity, collision.contacts[0].normal) * bumperForce, 
+                //ForceMode.Impulse);
             Debug.Log("Ho bumpato la palla");
         }
     }

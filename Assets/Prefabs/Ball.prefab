@@ -239,7 +239,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5667939550852272414}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 10
   m_Drag: 0.75
   m_AngularDrag: 0.02
   m_UseGravity: 1
@@ -259,9 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec69d176362b7be4d8362f75f55cf81d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stopVelocity: 0.25
+  stopVelocity: 0.4
   shotPower: 175
   gameManager: {fileID: 0}
   raycastPlane: {fileID: 0}
-  bIsIdle: 0
-  bIsAiming: 0

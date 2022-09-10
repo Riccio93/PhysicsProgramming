@@ -130,7 +130,7 @@ public class BallController : MonoBehaviour
         gameManager.SetGameState(GameState.Moving);
     }
 
-    private void Stop()
+    public void Stop()
     {
         rbody.velocity = Vector3.zero;
         rbody.angularVelocity = Vector3.zero;
