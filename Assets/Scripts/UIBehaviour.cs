@@ -1,28 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 using GameState = GameManager.GameState;
 
 public class UIBehaviour : MonoBehaviour
 {
-    [Header("Parameters")]
-    [SerializeField] private TextMeshProUGUI triesValue;
     [Header("Objects References")]
+    [SerializeField] private TextMeshProUGUI triesValue;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject aimingModeImage;
     [SerializeField] private GameObject freeModeImage;
     [SerializeField] private GameObject gameOverScreen;
     [SerializeField] private TextMeshProUGUI resultText;
-    [SerializeField] private TextMeshProUGUI unlockText;
+    [SerializeField] private TextMeshProUGUI cubeCount;
+    [SerializeField] private GameObject unlockAssets;
+    
 
+    private void Start()
+    {
+        if (gameManager.IsCubeModeActive())
+        {
+            cubeCount.gameObject.SetActive(true);
+            cubeCount.text = "CubeCount " + gameManager.GetCubeCount().ToString() + " / " + gameManager.GetCubeGoal().ToString();
+        }
+        else
+        {
+            cubeCount.gameObject.SetActive(false);
+        }
+    }
+
+    public void UpdateCubeCountText()
+    {
+        cubeCount.text = "CubeCount " + gameManager.GetCubeCount().ToString() + " / " + gameManager.GetCubeGoal().ToString();
+    }
 
     public void SetTriesValue(int value)
     {
-        triesValue.text = value.ToString();
+        triesValue.text = "Tries " + value.ToString();
     }
 
     public void ToggleMode()
@@ -54,24 +69,40 @@ public class UIBehaviour : MonoBehaviour
         {
             resultText.text = "YOU WIN!";
 
-            //Next levels unlocking
+            //Next level unlocking
             if(SceneManager.GetActiveScene().name == "Level1Scene" && PlayerPrefs.GetInt("Level2Unlocked", 0) == 0)
             {
-                unlockText.text = "Level 2 Unlocked!";
-                unlockText.gameObject.SetActive(true);
+                unlockAssets.GetComponentInChildren<TextMeshProUGUI>().text = "Level 2 Unlocked!";
+                unlockAssets.SetActive(true);
                 PlayerPrefs.SetInt("Level2Unlocked", 1);
             }
-            else if(SceneManager.GetActiveScene().name == "Level12Scene" && PlayerPrefs.GetInt("Level3Unlocked", 0) == 0)
+            else if(SceneManager.GetActiveScene().name == "Level2Scene" && PlayerPrefs.GetInt("Level3Unlocked", 0) == 0)
             {
-                unlockText.text = "Level 3 Unlocked!";
-                unlockText.gameObject.SetActive(true);
+                unlockAssets.GetComponentInChildren<TextMeshProUGUI>().text = "Level 3 Unlocked!";
+                unlockAssets.SetActive(true);
                 PlayerPrefs.SetInt("Level3Unlocked", 1);
+            }
+            else if (SceneManager.GetActiveScene().name == "Level3Scene" && PlayerPrefs.GetInt("Level4Unlocked", 0) == 0)
+            {
+                unlockAssets.GetComponentInChildren<TextMeshProUGUI>().text = "Level 4 Unlocked!";
+                unlockAssets.SetActive(true);
+                PlayerPrefs.SetInt("Level4Unlocked", 1);
+            }
+            else if (SceneManager.GetActiveScene().name == "Level4Scene" && PlayerPrefs.GetInt("Level5Unlocked", 0) == 0)
+            {
+                unlockAssets.GetComponentInChildren<TextMeshProUGUI>().text = "Level 5 Unlocked!";
+                unlockAssets.SetActive(true);
+                PlayerPrefs.SetInt("Level5Unlocked", 1);
+            }
+            else
+            {
+                unlockAssets.SetActive(false);
             }
         }
         else
         {
             resultText.text = "YOU LOSE...";
-            unlockText.gameObject.SetActive(false);
+            unlockAssets.SetActive(false);
         }
         gameOverScreen.SetActive(true);
     }

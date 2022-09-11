@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 using GameState = GameManager.GameState;
@@ -25,11 +24,8 @@ public class BallController : MonoBehaviour
     {
         return ballPosBeforeAiming;
     }
-
-    //[Header("DEBUG ONLY")]
-    /*[SerializeField]*/
     private bool bIsIdle;
-    /*[SerializeField]*/ private bool bIsAiming;
+    private bool bIsAiming;
 
     #region Unity Functions
 
@@ -45,11 +41,21 @@ public class BallController : MonoBehaviour
     private void FixedUpdate()
     {
         // if > 0 is removed bIsIdle is set to true again the first non-physics frame after the fixedupdate
-        if (rbody.velocity.magnitude < stopVelocity && rbody.velocity.magnitude > 0)
+        if (rbody.velocity.magnitude < stopVelocity && rbody.velocity.magnitude > 0 && gameManager.GetGameState() != GameState.Aiming)
         {
-            Stop();
+            StartCoroutine(CheckStopCoroutine());            
         }
         ComputeAim();
+    }
+
+    private IEnumerator CheckStopCoroutine()
+    {
+        yield return new WaitForSeconds(0.1f);
+        if(rbody.velocity.magnitude < stopVelocity && rbody.velocity.magnitude > 0)
+        {
+            Debug.Log("CALLING BALL STOP FUNCTION");
+            Stop();
+        }
     }
 
     #endregion

@@ -7,6 +7,26 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Vector3 cameraRotation;
     [SerializeField] private int numberOfTries = 3;
     [SerializeField] private float freeModeCameraMovement = .2f;
+    [SerializeField] private bool cubeMode = false;
+    [SerializeField] private int cubeGoal = 0;
+    private int cubeCount = 0;
+    public int GetCubeGoal()
+    {
+        return cubeGoal;
+    }
+    public int GetCubeCount()
+    {
+        return cubeCount;
+    }
+    public void IncrementCubeCount()
+    {
+        cubeCount++;
+        uiBehaviour.UpdateCubeCountText();
+    }
+    public bool IsCubeModeActive()
+    {
+        return cubeMode;
+    }
 
     [Header("Objects References")]
     [SerializeField] private Canvas canvas;
@@ -39,7 +59,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         uiBehaviour = canvas.GetComponent<UIBehaviour>();
-
         mainCamera.transform.rotation = Quaternion.Euler(cameraRotation);
     }
 
@@ -85,6 +104,14 @@ public class GameManager : MonoBehaviour
         {
             SetGameState(GameState.GameOver);
             uiBehaviour.ShowGameOverScreen(false);
+        }
+    }
+
+    public void CheckCubeModeWin()
+    {
+        if(cubeMode && cubeCount >= cubeGoal)
+        {
+            LevelCompleted();
         }
     }
 
