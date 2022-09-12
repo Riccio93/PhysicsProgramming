@@ -33,9 +33,12 @@ public class RedCubeBehaviour : MonoBehaviour
     //We have just one trigger, the kill plane
     private void OnTriggerEnter(Collider other)
     {
-        gameManager.IncrementCubeCount();
+        if (!bIsDestroyed)
+        {
+            bIsDestroyed = true;
+            gameManager.IncrementCubeCount();
+        }
         gameManager.CheckCubeModeWin();
         Destroy(gameObject);
     }
-
 }

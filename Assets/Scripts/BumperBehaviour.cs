@@ -22,15 +22,12 @@ public class BumperBehaviour : MonoBehaviour
         {
             if(collision.gameObject == ball)
             {
-                //ballRB.AddForce(collision.contacts[0].normal * bumperForce, ForceMode.Impulse);
-                //ballRB.AddExplosionForce(bumperForce, transform.position, 1);
                 ballRB.AddForce(Vector3.Reflect(new Vector3(ballRB.velocity.x, 0f, ballRB.velocity.z), collision.contacts[0].normal) * bumperForce, 
                     ForceMode.Impulse);
                 bJustBumpered = true;
                 StartCoroutine(ResetJustBumperedCoroutine());
             }
-        }
-        
+        }        
     }
 
     private IEnumerator ResetJustBumperedCoroutine()
