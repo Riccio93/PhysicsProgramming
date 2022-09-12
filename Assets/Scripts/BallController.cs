@@ -10,22 +10,22 @@ public class BallController : MonoBehaviour
     [SerializeField] private float stopVelocity = .1f;
     //Value to multiply for the line length to obtain the resulting force
     [SerializeField] private float shotPower = 150f;
-
-    [Header("Objects References")]
-    [SerializeField] private GameManager gameManager;
-    [SerializeField] private GameObject raycastPlane;
-
-    //Components
-    private Rigidbody rbody;
-    private LineRenderer lineRenderer;
-
+    private bool bIsIdle;
+    private bool bIsAiming;
     private Vector3 ballPosBeforeAiming;
     public Vector3 GetBallPosBeforeAiming()
     {
         return ballPosBeforeAiming;
     }
-    private bool bIsIdle;
-    private bool bIsAiming;
+
+    [Header("Objects References")]
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private SoundManager soundManager;
+    [SerializeField] private GameObject raycastPlane;    
+
+    //Components
+    private Rigidbody rbody;
+    private LineRenderer lineRenderer;
 
     #region Unity Functions
 
@@ -53,7 +53,6 @@ public class BallController : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         if(rbody.velocity.magnitude < stopVelocity && rbody.velocity.magnitude > 0)
         {
-            Debug.Log("CALLING BALL STOP FUNCTION");
             Stop();
         }
     }
@@ -81,6 +80,7 @@ public class BallController : MonoBehaviour
         Vector3 screenMousePosNear = new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane);
         Vector3 worldMousePosFar = Camera.main.ScreenToWorldPoint(screenMousePosFar);
         Vector3 worldMousePosNear = Camera.main.ScreenToWorldPoint(screenMousePosNear);
+
         if (Physics.Raycast(worldMousePosNear, worldMousePosFar - worldMousePosNear, out RaycastHit hit, float.PositiveInfinity))
         {
             return hit.point;
@@ -88,7 +88,7 @@ public class BallController : MonoBehaviour
         else
         {
             return null;
-        }
+        }        
     }
 
     private void DrawLine(Vector3 worldPoint)
@@ -98,7 +98,7 @@ public class BallController : MonoBehaviour
         lineRenderer.enabled = true;
     }
 
-    private void OnMouseDown()
+    public void OnMouseDown()
     {
         if (gameManager.GetGameState() == GameState.Aiming && bIsIdle)
         {
@@ -107,7 +107,7 @@ public class BallController : MonoBehaviour
         }
     }
 
-    private void OnMouseUp()
+    public void OnMouseUp()
     {
         if (gameManager.GetGameState() == GameState.Aiming && bIsAiming && bIsIdle)
         {
@@ -122,6 +122,8 @@ public class BallController : MonoBehaviour
 
     private void Shoot(Vector3 worldPoint)
     {
+        soundManager.PlaySound("Shoot");
+
         bIsAiming = false;
         lineRenderer.enabled = false;
         bIsIdle = false;
@@ -130,9 +132,8 @@ public class BallController : MonoBehaviour
         Vector3 direction = (horizontalWorldPoint - transform.position).normalized;
         float strength = Vector3.Distance(transform.position, horizontalWorldPoint);
         //the minus reverses the direction of the force
-        rbody.AddForce(-shotPower * strength * direction);
-        //rbody.AddTorque(-shotPower * strength * direction);
-
+        rbody.AddForce(-shotPower * strength * direction, ForceMode.Impulse);
+        
         gameManager.SetGameState(GameState.Moving);
     }
 
@@ -153,7 +154,7 @@ public class BallController : MonoBehaviour
 
     private void UpdateRaycastPlanePosition()
     {
-        //Moves the raycast plane under the ball, so that the raycast is always possible.
+        //Moves the raycast plane under the ball so that the raycast is always possible.
         raycastPlane.transform.position = transform.position + new Vector3(0, -1, 0);
     }
 

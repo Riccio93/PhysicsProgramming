@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool cubeMode = false;
     [SerializeField] private int cubeGoal = 0;
     private int cubeCount = 0;
+    private GameState gameState;
     public int GetCubeGoal()
     {
         return cubeGoal;
@@ -32,10 +33,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Canvas canvas;
     private UIBehaviour uiBehaviour;
     [SerializeField] private Camera mainCamera;
-    [SerializeField] private GameObject ball;
-
-    [Header("DEBUG ONLY")]
-    [SerializeField] private GameState gameState;
+    [SerializeField] private GameObject ball;    
 
     public enum GameState
     {
@@ -66,6 +64,11 @@ public class GameManager : MonoBehaviour
     {
         gameState = GameState.Aiming;
         uiBehaviour.SetTriesValue(numberOfTries);
+    }
+
+    private void OnMouseDown()
+    {
+        Debug.Log("LOOOOOOOOOOOOOOOOL");
     }
 
     private void LateUpdate()

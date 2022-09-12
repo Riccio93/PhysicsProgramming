@@ -22,7 +22,7 @@ public class UIBehaviour : MonoBehaviour
         if (gameManager.IsCubeModeActive())
         {
             cubeCount.gameObject.SetActive(true);
-            cubeCount.text = "CubeCount " + gameManager.GetCubeCount().ToString() + " / " + gameManager.GetCubeGoal().ToString();
+            cubeCount.text = gameManager.GetCubeCount().ToString() + " / " + gameManager.GetCubeGoal().ToString();
         }
         else
         {
@@ -32,12 +32,12 @@ public class UIBehaviour : MonoBehaviour
 
     public void UpdateCubeCountText()
     {
-        cubeCount.text = "CubeCount " + gameManager.GetCubeCount().ToString() + " / " + gameManager.GetCubeGoal().ToString();
+        cubeCount.text = gameManager.GetCubeCount().ToString() + " / " + gameManager.GetCubeGoal().ToString();
     }
 
     public void SetTriesValue(int value)
     {
-        triesValue.text = "Tries " + value.ToString();
+        triesValue.text = value.ToString();
     }
 
     public void ToggleMode()
